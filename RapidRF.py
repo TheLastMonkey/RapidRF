@@ -1,10 +1,11 @@
 import os
 from time import sleep
+import RRF_config
 
-input_freq = "434"
-input_gain = "35"
-output_freq = "434"
-
+input_freq = RRF_config.input_freq
+input_gain = RRF_config.input_gain
+output_freq = RRF_config.output_freq
+dis_splash = RRF_config.dis_splash
 
 dis_lines = "=" * 50
 dis_under_line = "_" * 50
@@ -16,8 +17,14 @@ def kill_it():
 def main():
     os.system("clear")
     bouncer()
+    if dis_splash:
+        print(dis_lines)
+        RRF_config.splash()
+        print(dis_lines)
+        sleep(1)
+        os.system("clear")
     radio_info()
-    main_rec_screen()
+    main_screen()
 
 
 def radio_info():
@@ -28,7 +35,7 @@ def radio_info():
     print(dis_lines)
     print("Choose INPUT Frequency (in MHZ)")
     print("This is the frequency your ltr-sdr will Listen on")
-    print("Default is 434MHZ")
+    print("Default is {}MHZ".format(RRF_config.input_freq))
     print(dis_under_line)
     input_freq_temp = str(input("INPUT Frequency = "))
     if input_freq_temp == "":
@@ -42,7 +49,7 @@ def radio_info():
     print(dis_lines)
     print("Choose INPUT Gain (1-45)")
     print("This is the Gain Level your ltr-sdr will use")
-    print("Default is 35")
+    print("Default is {}".format(RRF_config.input_gain))
     print(dis_under_line)
     input_gain_temp = str(input("INPUT Gain = "))
     if input_gain_temp == "":
@@ -62,7 +69,7 @@ def replay_only_radio_info():
     print(dis_lines)
     print("Choose OUTPUT Frequency (in MHZ)")
     print("This is the frequency your Pi will Broadcast on")
-    print("Default is 434MHZ")
+    print("Default is {}MHZ".format(RRF_config.output_freq))
     print(dis_under_line)
     output_freq_temp = str(input("INPUT Frequency = "))
     if output_freq_temp == "":
@@ -94,8 +101,9 @@ def load_play():
         replay_only_radio_info()
         load_play()
     elif main_load_play_choice in ("4", "b", "B", ""):
-        main_rec_screen()
+        main_screen()
     elif main_load_play_choice in ("5", "q", "Q"):
+        os.system("clear")
         print("bye-bye")
         quit()
 
@@ -160,19 +168,19 @@ def play_file(file_num_to_replay, loop, f_list):
         play_file(file_num_to_replay, loop, f_list)
 
 
-def main_rec_screen():
+def main_screen():
     kill_it()
     os.system("clear")
     display()
-    print("Record and Replay")
+    print("RapidRF")
     print(dis_lines)
     print("1.[R]ec NOW    [Enter]")
     print("2.Re[P]lay")
     print("3.RePlay on [L]oop")
     print("4.[S]ave")
-    print("5.Save AND [M]ake Bash script")
-    print("6.[C]hange Freq")
-    print("7.Load [A]nd Replay")
+    print("5.Load [A]nd Replay")
+    print("6.Save AND [M]ake Bash script")
+    print("7.[C]hange Freq")
     print("8.[Q]uit")
     print(dis_under_line)
     main_rec_choice = str(input("Choose : "))
@@ -185,19 +193,20 @@ def main_rec_screen():
         replay(loop=True)
     elif main_rec_choice in ("4", "s", "S"):
         save_it(bash_it=False)
-    elif main_rec_choice in ("5", "m", "M"):
-        save_it(bash_it=True)
-    elif main_rec_choice in ("6", "c", "C"):
-        radio_info()
-        main_rec_screen()
-    elif main_rec_choice in ("7", "a", "A"):
+    elif main_rec_choice in ("5", "a", "A"):
         load_play()
+    elif main_rec_choice in ("6", "m", "M"):
+        save_it(bash_it=True)
+    elif main_rec_choice in ("7", "c", "C"):
+        radio_info()
+        main_screen()
     elif main_rec_choice in ("8", "q", "Q"):
+        os.system("clear")
         print("bye-bye")
         quit()
     else:
         os.system("clear")
-        main_rec_screen()
+        main_screen()
 
 
 def rec():
@@ -217,7 +226,7 @@ def rec():
     respon = input("Press [Enter] to STOP OR set IN Freq & try again : ")
     kill_it()
     if respon == "":
-        main_rec_screen()
+        main_screen()
     else:
         input_freq = respon
         rec()
@@ -246,7 +255,7 @@ def replay(loop):
     respon = input("Press [Enter] to STOP OR set OUT Freq : ")
     kill_it()
     if respon == "":
-        main_rec_screen()
+        main_screen()
     else:
         output_freq = respon
         replay(loop)
@@ -257,7 +266,7 @@ def save_it(bash_it):
     display()
     save_name = input("Input Filename (without .iq) : ")
     if save_name == "":
-        main_rec_screen()
+        main_screen()
     else:
         print("Saving...")
         save_com = "cp record.iq SAVED/{1}_{0}.iq".format(output_freq, save_name)
@@ -268,11 +277,11 @@ def save_it(bash_it):
             os.system(com_str_sh)
         print("Saved!!!!")
         sleep(0.5)
-        main_rec_screen()
+        main_screen()
 
 
 def display():
-    print("IN freq: {0}        Gain: {2}         OUT freq: {1}".format(input_freq, output_freq, input_gain))
+    print("IN freq: {0}      Gain: {2}      OUT freq: {1}".format(input_freq, output_freq, input_gain))
     print(dis_lines)
 
 
